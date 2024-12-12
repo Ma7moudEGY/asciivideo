@@ -4,11 +4,6 @@
 #include "pixel.h"
 #include "helpers.h"
 
-typedef struct
-{
-    uint16_t rgb[3];
-} pixel;
-
 // create a new pixel
 pixel *pixel_new(uint16_t red, uint16_t green, uint16_t blue)
 {

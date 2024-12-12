@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 // There are 10 levels of brightness. It depends on the intensity (brightness) of the pixel.
-const char ASCII_CHARS[10] = "@\%#*+=-:. ";
+const char ASCII_CHARS[] = "@\%#*+=-:. \0";
 
 typedef struct
 {
