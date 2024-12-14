@@ -8,7 +8,7 @@ typedef struct
 {
   uint64_t id; // the ID of the frame, its order in the video
   uint32_t height;
-  uint32_t widht;
+  uint32_t width;
   pixel pixels[]; // Array of pixels for the frame.
 } frame;
 

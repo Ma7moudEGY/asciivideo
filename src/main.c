@@ -3,20 +3,55 @@
 #include <string.h>
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
-#include <pthread.h>
-#include <omp.h>
 
-// static void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize, char *filename)
-// {
-//     FILE *f;
-//     int i;
+#define __USE_MISC
+#include <unistd.h>
 
-//     f = fopen(filename, "wb");
-//     fprintf(f, "P5\n%d %d\n%d\n", xsize, ysize, 255);
-//     for (i = 0; i < ysize; i++)
-//         fwrite(buf + i * wrap, 1, xsize, f);
-//     fclose(f);
-// }
+#define FRAME_DELAY 33333 // Microseconds (1/30 second)
+
+static void ascii_save(unsigned char *buf, int wrap, int xsize, int ysize, char *filename)
+{
+    FILE *file = fopen(filename, "wb");
+    const char *ascii_map = " .:-=+*%#@";
+    int ascii_len = strlen(ascii_map);
+
+    for (int y = 0; y < ysize; y++)
+    {
+        for (int x = 0; x < xsize; x++)
+        {
+            // Map pixel intensity (0-255) to an ASCII character
+            unsigned char pixel_value = buf[y * wrap + x];
+            char ascii_char = ascii_map[(pixel_value * (ascii_len - 1)) / 255];
+            fputc(ascii_char, file);
+            fputc(ascii_char, file);
+            fputc(ascii_char, file);
+            // printf("f");
+        }
+        fputc('\n', file); // New line for each row
+    }
+
+    // fwrite(file_buf, xsize * ysize, xsize * ysize, file);
+    fclose(file);
+}
+
+static void player(const char *prefix)
+{
+    for (int i = 1; i <= 450; i++)
+    {
+        // chr buf[100];
+        char filename[128];
+        snprintf(filename, sizeof(filename), "%s-%i.ascii", prefix, i);
+        FILE *file = fopen(filename, "r");
+        printf("\t\t\t");
+        char ch;
+        while ((ch = fgetc(file)) != EOF)
+        {
+            printf("%c", ch);
+        }
+        usleep(FRAME_DELAY);
+        fflush(stdout);
+    }
+}
 
 static void decode(AVCodecContext *dec_ctx, AVFrame *frame, AVPacket *pkt, const char *filename)
 {
@@ -41,19 +76,13 @@ static void decode(AVCodecContext *dec_ctx, AVFrame *frame, AVPacket *pkt, const
             exit(1);
         }
 
-        printf("Saving frame %ld\n", dec_ctx->frame_num);
-        snprintf(buf, sizeof(buf), "%s/%ld.pgm", filename, dec_ctx->frame_num);
-        printf("==> line size: %i , res:C %i %i*%i\n", frame->linesize[0], frame->linesize[0] * frame->height, frame->height, frame->width);
+        printf("Saving frame %ld: %ix%i\n", dec_ctx->frame_num, frame->width, frame->height);
+        snprintf(buf, sizeof(buf), "%s-%ld.ascii", filename, dec_ctx->frame_num);
 
-        #pragma omp parallel for 
-        for (int height = 0; height < frame->height; height++)
-        {
-            for (int width = 0; width < frame->linesize[0]; width++)
-            {
-                printf("f#%li px#%i r: %i, g: %i, b: %i \n ", dec_ctx->frame_num, width * height, frame->data[0][width * 3 + height], frame->data[0][width * 3 + height + 1], frame->data[0][width * 3 + height + 2]);
-            }
-        }
+        ascii_save(frame->data[0], frame->linesize[0], frame->width, frame->height, buf);
+        // usleep(FRAME_DELAY);
     }
+    printf("Decoding is done\n");
 }
 
 int main(int argc, char **argv)
@@ -157,6 +186,7 @@ int main(int argc, char **argv)
     // Flush the decoder
     decode(codec_ctx, frame, NULL, outfilename);
 
+    player(outfilename);
     // Clean up
     av_frame_free(&frame);
     av_packet_free(&pkt);
