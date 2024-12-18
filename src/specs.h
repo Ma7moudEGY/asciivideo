@@ -2,15 +2,16 @@
 #define _SPEC_H
 
 #include <stdint.h>
-
+#include <stdbool.h>
 typedef struct
 {
   uint32_t
       frames_count; // the count of frames of the video that will be rendererd
-  uint16_t fps;     // Count of the frames that will be rendererd per second
-  float duration;   // Duration of the video in seconds
+  double fps;       // Count of the frames that will be rendererd per second
+  double duration;  // Duration of the video in seconds
   uint32_t width;
   uint32_t height;
+  bool audio;
 
 } specs;
 
@@ -18,7 +19,7 @@ typedef struct
  * Create a new structure for specifications of video.
  */
 
-specs *specs_new(unsigned int frames_count, unsigned short fps, float duration, uint32_t width, uint32_t height);
+specs *specs_new(uint64_t frames_count, double fps, double duration, uint32_t width, uint32_t height, bool audio);
 
 /*
  * Serialize and convert the struct into string depend on this schema:

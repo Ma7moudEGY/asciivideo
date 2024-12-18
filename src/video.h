@@ -37,8 +37,13 @@ static int video_find_decoder(video *vid);
  * Decoding video frames into struct frames (frames.h)
  */
 
-int video_decode_frames(video *vid, int (*handler)(AVCodecContext *codec_ctx, AVFrame *frame, AVPacket *pkt, const char *out));
+int video_decode_frames(video *vid, int (*handler)(AVCodecContext *codec_ctx, AVFrame *frame, AVPacket *pkt, AVFormatContext *fmt_ctx, AVStream *video_stream, const char *out));
 
+/**
+ * Extract the audio from video source
+ */
+
+int video_extract_audio(video *vid, const char *output_file);
 /**
  * Clean up the video from the memory
  */

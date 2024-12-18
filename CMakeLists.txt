@@ -8,7 +8,6 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Enable verbose output during compilation (optional)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
-
 # Set the build output directory for executables and libraries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
@@ -19,11 +18,7 @@ file(GLOB SOURCES "src/*.c")
 
 # Add platform-specific configurations
 if(WIN32)
-    message(STATUS "Configuring for Windows")
-    set(FFMPEG_LIBRARIES avcodec avdevice avfilter avformat avutil swresample swscale)
-    set(FFMPEG_LIBRARY_DIR modules/lib)
-    set(FFMPEG_INCLUDE_DIR modules/include)
-    include_directories(${FFMPEG_INCLUDE_DIR})
+    message(STATUS "Windows isn't supported till now.")
 else()
     message(STATUS "Configuring for Unix-like system")
     find_package(PkgConfig REQUIRED)
@@ -31,6 +26,9 @@ else()
         libavcodec libavdevice libavfilter libavformat libavutil libswresample libswscale)
     include_directories(${FFMPEG_INCLUDE_DIRS})
     link_directories(${FFMPEG_LIBRARY_DIRS})
+    find_package(Curses REQUIRED)
+    include_directories(${CURSES_INCLUDE_DIR})
+
 endif()
 
 # Define the target
@@ -41,9 +39,8 @@ if(WIN32)
     target_link_directories(asciivideo PRIVATE ${FFMPEG_LIBRARY_DIR})
     target_link_libraries(asciivideo ${FFMPEG_LIBRARIES})
 else()
-    target_link_libraries(asciivideo ${FFMPEG_LIBRARIES})
+    target_link_libraries(asciivideo ${FFMPEG_LIBRARIES} ${CURSES_LIBRARIES})
 endif()
-
 
 # Install rules (optional)
 install(TARGETS asciivideo DESTINATION bin)

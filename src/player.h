@@ -1,22 +1,28 @@
-#ifndef _GEN_H
-#define _GEN_H
+#ifndef _PLAYER_H
+#define _PLAYER_H
 
 #include "./specs.h"
 
 typedef struct
 {
-    char *src;
+    const char *src;
     specs *specs;
-} video_player;
+    pid_t audio_pid;
+} player;
 
 /**
  * Creatting a new video player struct.
  */
-video_player *viden_player_new(char *src, specs *specs);
+player *player_new(const char *src, specs *specs);
 
 /**
- * Running the player.
+ * Running the video player.
  */
-int video_player_run(video_player *player);
+int player_video_run(player *player);
+
+/**
+ * Running the audio player.
+ */
+int player_audio_run(player *player);
 
 #endif
